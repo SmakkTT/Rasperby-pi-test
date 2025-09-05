@@ -1,52 +1,34 @@
 import RPi.GPIO as GPIO
 
-
-ledPin = 24 # define ledPin
-
-buttonPin = 23 # define buttonPin
-
+ledPin = 17  # define ledPin
+buttonPin = 27  # define buttonPin
 
 def setup():
-
-    GPIO.setmode(GPIO.BCM) # use PHYSICAL GPIO Numbering
-
-    GPIO.setup(ledPin, GPIO.OUT) # set ledPin to OUTPUT mode
-
-    GPIO.setup(buttonPin, GPIO.IN, pull_up_down=GPIO.PUD_UP) # set buttonPin to PULL UP INPUT mode
-
+    GPIO.setmode(GPIO.BCM)  # use PHYSICAL GPIO Numbering
+    GPIO.setup(ledPin, GPIO.OUT)  # set ledPin to OUTPUT mode
+    GPIO.setup(buttonPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # set buttonPin to PULL UP INPUT mode
 
 def loop():
-
+    prev_state = None  # Track previous LED state
     while True:
-
-        if GPIO.input(buttonPin)==GPIO.LOW: # if button is pressed
-
-            GPIO.output(ledPin,GPIO.HIGH) # turn on led
-
-            print ('led turned on >>>') # print information on terminal
-
-        else : # if button is relessed
-
-            GPIO.output(ledPin,GPIO.LOW) # turn off led
-
-            print ('led turned off <<<')
-
+        current_state = GPIO.input(buttonPin) == GPIO.LOW  # True if button pressed, False otherwise
+        if current_state != prev_state:  # Only act on state change
+            if current_state:  # Button is pressed
+                GPIO.output(ledPin, GPIO.HIGH)  # turn on led
+                print('led turned on >>>')
+            else:  # Button is released
+                GPIO.output(ledPin, GPIO.LOW)  # turn off led
+                print('led turned off <<<')
+            prev_state = current_state  # Update previous state
 
 def destroy():
+    GPIO.output(ledPin, GPIO.LOW)  # turn off led
+    GPIO.cleanup()  # Release GPIO resource
 
-    GPIO.output(ledPin, GPIO.LOW) # turn off led
-
-    GPIO.cleanup() # Release GPIO resource
-
-
-if __name__ == '__main__': # Program entrance
-
-    print ('Program is starting...')
-
+if __name__ == '__main__':  # Program entrance
+    print('Program is starting...')
     setup()
-
-try:
-    loop()
-except KeyboardInterrupt: # Press ctrl-c to end the program.
-
-    destroy()
+    try:
+        loop()
+    except KeyboardInterrupt:  # Press ctrl-c to end the program
+        destroy()
